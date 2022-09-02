@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta author="Nicolas Chourot">
+    <meta http-equiv="Content-Type" content="text/html; charset= ISO-8859-1">
+    <title>Test Maths API</title>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        .container {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: x-large;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Entête de la liste de contact -->
+    <div class="container">
+
+    </div>
+
+    <!-- Fichier local qui contient la librairie jQuery -->
+    <script src="js/jquery-3.3.1.js"></script>
+    <!-- Fichier local qui contient la librairie de Validation -->
+    <script src="js/mathsAPIRequest.js"></script>
+    <!-- Fichier local qui contient la librairie de dialogue de confirmation -->
+
+    <script>
+        "use strict";
+
+        $(document).ready(launchTests);
+
+        function launchTests() {
+            
+            webAPI_getMaths("?op=+&x=-111&y=-244", showResult);
+            webAPI_getMaths("?op=-&x=111&y=244", showResult);
+            webAPI_getMaths("?op=*&x=11&y=244", showResult);
+            webAPI_getMaths("?op=/&x=99&y=11", showResult);
+            webAPI_getMaths("?op=/&x=99&y=0", showResult);
+            webAPI_getMaths("?op=/&x=0&y=0", showResult);
+            webAPI_getMaths("?op=%&x=100&y=11", showResult);
+            webAPI_getMaths("?op=%&x=100&y=0", showResult);
+            webAPI_getMaths("?op=%&x=0&y=0", showResult);
+            webAPI_getMaths("?op=!&n=5", showResult);
+            webAPI_getMaths("?op=p&n=5", showResult);
+            webAPI_getMaths("?op=np&n=1", showResult);
+
+            webAPI_getMaths("?op=+&X=111&y=244", showResult);
+            webAPI_getMaths("?op=+&x=111&Y=244", showResult);
+            webAPI_getMaths("?op=+&x=111&y=244&z=0", showResult);
+            webAPI_getMaths("?op=!&n=5&z=0", showResult);
+            webAPI_getMaths("?z=0", showResult);
+            webAPI_getMaths("?op=x&n=5", showResult);
+            webAPI_getMaths("?x", showResult);
+        }
+
+        function verify(result) {
+            if (result.op != null) {
+                switch (result.op) {
+                    case '+':
+                    case '-':
+                    case '*':
+                    case '/':
+                    case '%':
+                        if (Object.keys(result).length != 4)
+                            return (result.error != null);
+                        if (result.x == null)
+                            return (result.error != null);
+                        if (parseInt(result.x) == NaN)
+                            return (result.error != null);
+                        if (result.y == null)
+                            return (result.error != null);
+                        if (parseInt(result.y) == NaN)
+                            return (result.error != null);
+                        break;
+                    case '!':
+                    case 'p':
+                    case 'np':
+                        if (Object.keys(result).length != 3)
+                            return (result.error != null);
+                        if (result.n == null)
+                            return (result.error != null);
+                        break;
+                        if (parseInt(result.n) == NaN)
+                            return (result.error != null);
+                    default:
+                        return (result.error != null);
+                }
+
+                if (result.value == null)
+                    return false;
+                switch (result.op) {
+                    case '+': return (result.value == parseInt(result.x) + parseInt(result.y));
+                    case '-': return (result.value == parseInt(result.x) - parseInt(result.y));
+                    case '*': return (result.value == parseInt(result.x) * parseInt(result.y));
+                    case '/':
+                        if (result.value == "NaN" && parseInt(result.x) == 0 && parseInt(result.y) == 0)
+                            return true;
+                        return (result.value == parseInt(result.x) / parseInt(result.y));
+                    case '%':
+                        if (result.value == "NaN" && parseInt(result.y) == 0)
+                            return true; return (result.value == parseInt(result.x) % parseInt(result.y));
+                    case '!': return (result.value == factorial(parseInt(result.n)));
+                    case 'p': return (result.value == isPrime(parseInt(result.n)));
+                    case 'np': return (result.value == findPrime(parseInt(result.n)));
+                    default:
+                        return (result.error != null);
+                }
+
+            } else {
+                return (result.error != null)
+            }
+            return true;
+        }
+
+        function sleep(milliseconds) {
+            const date = Date.now();
+            let currentDate = null;
+            do {
+                currentDate = Date.now();
+            } while (currentDate - date < milliseconds);
+        }
+        function showResult(result) {
+            sleep(55);
+            let status = (verify(result) ? "OK" : "ERROR")
+            $(".container").append(status + " ---> " + JSON.stringify(result)).append($("<br>"));
+        }
+        function factorial(n) {
+            if (n === 0 || n === 1) {
+                return 1;
+            }
+            return n * factorial(n - 1);
+        }
+
+        function isPrime(value) {
+            for (var i = 2; i < value; i++) {
+                if (value % i === 0) {
+                    return false;
+                }
+            }
+            return value > 1;
+        }
+
+        function findPrime(n) {
+            let primeNumer = 0;
+            for (let i = 0; i < n; i++) {
+                primeNumer++;
+                while (!isPrime(primeNumer)) {
+                    primeNumer++;
+                }
+            }
+            return primeNumer;
+        }
+    </script>
+</body>
+
+</html>
