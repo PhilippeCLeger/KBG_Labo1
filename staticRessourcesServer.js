@@ -35,7 +35,7 @@ exports.sendRequestedRessource = (HttpContext) => {
                 resolve(false);
             } else {
                 HttpContext.response.res.writeHead(500);
-                HttpContext.response.end(`Server error: ${err.code}`);
+                HttpContext.response.end(`Server error: ${error.code}`);
                 resolve(true);
             }
         }
