@@ -11,9 +11,15 @@ const mimes = require('./mimes.json');
 let wwwroot = 'wwwroot';
 let defaultRessource = 'index.html';
 
+function isDirectory(url) {
+    let extension = path.extname(url).replace('.', '');
+    return extension == '';
+}
 function requestedStaticRessource(url) {
-    let ressourceName = url === '/' ? defaultRessource : url;
-    return path.join(__dirname, wwwroot, ressourceName);
+    let isDir = isDirectory(url);
+    let ressourceName = isDir ? url + defaultRessource : url;
+    let ressourcePath = path.join(__dirname, wwwroot, ressourceName);
+    return ressourcePath;
 }
 function extToContentType(filePath) {
     let extension = path.extname(filePath).replace('.', '');
