@@ -29,13 +29,15 @@ module.exports =
                 this.req.on('data', chunk => {
                     body.push(chunk);
                 }).on('end', () => {
-                    if (this.req.headers['content-type'] == "application/json")
-                        this.payload = JSON.parse(body);
-                    else
-                        if (this.req.headers["content-type"] === "application/x-www-form-urlencoded")
-                            this.payload = queryString.parse(body.toString());
+                    if (body.length > 0) {
+                        if (this.req.headers['content-type'] == "application/json")
+                            this.payload = JSON.parse(body);
                         else
-                            this.payload = body.toString();
+                            if (this.req.headers["content-type"] === "application/x-www-form-urlencoded")
+                                this.payload = queryString.parse(body.toString());
+                            else
+                                this.payload = body.toString();
+                    }
                     resolve(this.payload);
                 });
             })
