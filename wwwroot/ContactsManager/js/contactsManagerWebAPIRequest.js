@@ -17,7 +17,7 @@ function webAPI_getContacts(successCallBack, errorCallBack) {
         },
         error: function (jqXHR, textStatus, errorThrown) {
             errorCallBack("Erreur " + jqXHR.status);
-            console.log("webAPI_getContact - error");
+            console.log("webAPI_getContacts - error");
         }
     });
 }
