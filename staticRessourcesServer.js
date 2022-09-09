@@ -18,7 +18,7 @@ function isDirectory(url) {
 function requestedStaticRessource(url) {
     let isDir = isDirectory(url);
     let ressourceName = isDir ? url + defaultRessource : url;
-    let ressourcePath = path.join(__dirname, wwwroot, ressourceName);
+    let ressourcePath = path.join(process.cwd(), wwwroot, ressourceName);
     return ressourcePath;
 }
 function extToContentType(filePath) {
