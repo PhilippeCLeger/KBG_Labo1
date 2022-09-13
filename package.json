@@ -12,5 +12,14 @@
   "dependencies": {
     "date-and-time": "^2.4.1",
     "query-string": "^7.1.1"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nicolas-Chourot/API-Server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Nicolas-Chourot/API-Server/issues"
+  },
+  "homepage": "https://github.com/Nicolas-Chourot/API-Server#readme"
 }
