@@ -27,7 +27,7 @@ module.exports = class MathsController extends require('./Controller'){
         var params = this.HttpContext.path.params;
         if(!params || Object.keys(params).length == 0){
             console.log(process.cwd());
-            let content = fs.readFileSync(`${process.cwd()}\\wwwroot\\MathsHelp.html`);
+            let content = fs.readFileSync(`${process.cwd()}//wwwroot//MathsHelp.html`);
             this.HttpContext.response.HTML(content)
         }
         else if(!("op" in params))
