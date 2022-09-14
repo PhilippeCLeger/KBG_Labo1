@@ -1,9 +1,26 @@
+// 2022-09
+// Philippe C. Léger
+// KBG - Laboratoire 1
+// Class MathsController: Controller managing the maths api's end points.
+
+
 const fs = require('fs');
 
 module.exports = class MathsController extends require('./Controller'){
-
-
-
+    constructor(HttpContext) {
+        super(HttpContext);
+        this.operatorProcessors = {
+            "+": p => this.processAddition(p),
+            " ": p => this.processAddition(p),
+            "-": p => this.processSubstraction(p),
+            "*": p => this.processMultiplication(p),
+            "/": p => this.processDivision(p),
+            "%": p => this.processModulo(p),
+            "!": p => this.processFactorial(p),
+            "p": p => this.processIsPrime(p),
+            "np": p => this.processNthPrime(p)
+        }
+    }
 
 
     get(id){
@@ -27,6 +44,7 @@ module.exports = class MathsController extends require('./Controller'){
             this.responseUnknownOperator(params.op);
     }
 
+    // Parameters validation methods.
     validateNumParam(params, key = "n"){
         if (!isNaN(params[key])) return true;
         this.responseInvalidParameterType(key, "number", params);
@@ -64,8 +82,10 @@ module.exports = class MathsController extends require('./Controller'){
         if (value % 1 == 0 && (value > 0 || (zeroOK && value == 0)))
             return true;
         this.responseError(`'${key}' is not an integer >${zeroOK ? "=" : ""} 0`, params)
+        return false;
     }
 
+    // Operation processing methods.
     processAddition(params){
         params.op = "+"
         if(this.validateParameters(params, ['x', 'y']))
@@ -95,48 +115,21 @@ module.exports = class MathsController extends require('./Controller'){
 
     processFactorial(params){
         if(this.validateParameters(params, ['n']) && this.validatePositiveInt(params, 'n', true))
-            this.responseOK(this.factorial(Number(params.n)), params);
+            this.responseOK(factorial(Number(params.n)), params);
     }
 
     processIsPrime(params){
         if(this.validateParameters(params, ['n']))
-            this.responseOK(this.isPrime(Number(params.n)), params, false);
+            this.responseOK(isPrime(Number(params.n)), params, false);
     }
 
     processNthPrime(params){
         if(this.validateParameters(params, ['n']))
-            this.responseOK(this.findPrime(Number(params.n)), params);
+            this.responseOK(findPrime(Number(params.n)), params);
     }
 
 
-    factorial(n){
-        if(n===0||n===1){
-          return 1;
-        }
-        return n*this.factorial(n-1);
-    }
-    isPrime(value) {
-        for(var i = 2; i < value; i++) {
-            if(value % i === 0) {
-                return false;
-            }
-        }
-        return value > 1;
-    }
-    findPrime(n){
-        let primeNumer = 0;
-        for ( let i=0; i < n; i++){
-            primeNumer++;
-            while (!this.isPrime(primeNumer)){
-                primeNumer++;
-            }
-        }
-        return primeNumer;
-    }
-    
-
-
-
+    // Response publishing methods.
     responseUnknownOperator(operator, params){
         this.responseError(`Unknown operator: '${operator}'`, params)
     }
@@ -161,18 +154,33 @@ module.exports = class MathsController extends require('./Controller'){
         this.HttpContext.response.JSON(params)
     }
 
-    constructor(HttpContext) {
-        super(HttpContext);
-        this.operatorProcessors = {
-            "+": p => this.processAddition(p),
-            " ": p => this.processAddition(p),
-            "-": p => this.processSubstraction(p),
-            "*": p => this.processMultiplication(p),
-            "/": p => this.processDivision(p),
-            "%": p => this.processModulo(p),
-            "!": p => this.processFactorial(p),
-            "p": p => this.processIsPrime(p),
-            "np": p => this.processNthPrime(p)
+
+}
+
+
+function factorial(n){
+    if(n===0||n===1){
+      return 1;
+    }
+    return n*this.factorial(n-1);
+}
+
+function isPrime(value) {
+    for(var i = 2; i < value; i++) {
+        if(value % i === 0) {
+            return false;
         }
     }
+    return value > 1;
+}
+
+function findPrime(n){
+    let primeNumer = 0;
+    for ( let i=0; i < n; i++){
+        primeNumer++;
+        while (!isPrime(primeNumer)){
+            primeNumer++;
+        }
+    }
+    return primeNumer;
 }
