@@ -1,3 +1,4 @@
+const fs = require('fs');
 
 module.exports = class MathsController extends require('./Controller'){
 
@@ -7,14 +8,15 @@ module.exports = class MathsController extends require('./Controller'){
 
     get(id){
         var params = this.HttpContext.path.params;
-        if(!params)
-            this.responseError("Help!!");
+        if(!params || Object.keys(params).length == 0){
+            console.log(process.cwd());
+            let content = fs.readFileSync(`${process.cwd()}\\wwwroot\\MathsHelp.html`);
+            this.HttpContext.response.HTML(content)
+        }
         else if(!("op" in params))
             this.responseMissingParameter("op");
         else
             this.processOperator(params);
-        // this.HttpContext.response.JSON(params);
-
     }
 
 
@@ -36,22 +38,43 @@ module.exports = class MathsController extends require('./Controller'){
         this.validateNumParam(params, "y");
     }
 
+    validateParameters(params, expectedNums){
+        for (let key in params){
+            if (key != "op" && !expectedNums.includes(key)){
+                this.responseError(`Unexpected parameter: ${key}`, params);
+                return false;
+            }
+        }
+        
+        for (let i in expectedNums){
+            let key = expectedNums[i];
+            if (!params[key]){
+                this.responseError(`Missing parameter: ${key}`);
+                return false;
+            } else if (!this.validateNumParam(params, key)){
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
     validatePositiveInt(params, key, zeroOK = false){
         let value = Number(params[key]);
         if (value % 1 == 0 && (value > 0 || (zeroOK && value == 0)))
             return true;
-        this.responseError(`'${key}' is not an integer >${zeroOK && "="} 0`, params)
+        this.responseError(`'${key}' is not an integer >${zeroOK ? "=" : ""} 0`, params)
     }
 
     processAddition(params){
         params.op = "+"
-        if(this.validateXY(params))
+        if(this.validateParameters(params, ['x', 'y']))
             this.responseOK(Number(params.x) + Number(params.y), params);
         
     }
 
     processSubstraction(params){
-        if(this.validateXY(params))
+        if(this.validateParameters(params, ['x', 'y']))
             this.responseOK(Number(params.x) - Number(params.y), params);
     }
 
@@ -61,26 +84,58 @@ module.exports = class MathsController extends require('./Controller'){
     }
 
     processDivision(params){
-        if(this.validateXY(params))
+        if(this.validateParameters(params, ['x', 'y']))
             this.responseOK(Number(params.x) / Number(params.y), params);
     }
 
     processModulo(params){
-        if(this.validateXY(params))
+        if(this.validateParameters(params, ['x', 'y']))
             this.responseOK(Number(params.x) % Number(params.y), params);
     }
 
     processFactorial(params){
-        this.responseError("", params)
+        if(this.validateParameters(params, ['n']) && this.validatePositiveInt(params, 'n', true))
+            this.responseOK(this.factorial(Number(params.n)), params);
     }
 
     processIsPrime(params){
-        this.responseError("", params)
+        if(this.validateParameters(params, ['n']))
+            this.responseOK(this.isPrime(Number(params.n)), params, false);
     }
 
     processNthPrime(params){
-        this.responseError("", params)
+        if(this.validateParameters(params, ['n']))
+            this.responseOK(this.findPrime(Number(params.n)), params);
     }
+
+
+    factorial(n){
+        if(n===0||n===1){
+          return 1;
+        }
+        return n*this.factorial(n-1);
+    }
+    isPrime(value) {
+        for(var i = 2; i < value; i++) {
+            if(value % i === 0) {
+                return false;
+            }
+        }
+        return value > 1;
+    }
+    findPrime(n){
+        let primeNumer = 0;
+        for ( let i=0; i < n; i++){
+            primeNumer++;
+            while (!this.isPrime(primeNumer)){
+                primeNumer++;
+            }
+        }
+        return primeNumer;
+    }
+    
+
+
 
     responseUnknownOperator(operator, params){
         this.responseError(`Unknown operator: '${operator}'`, params)
@@ -95,13 +150,14 @@ module.exports = class MathsController extends require('./Controller'){
     }
     
     responseError(errorText, params){
+        if (!params)
+            params = {};
         params.error = errorText;
-        this.HttpContext.response.res.writeHead(522, {'content-type': 'application/json'})
-        this.HttpContext.response.end(JSON.stringify(params));
+        this.HttpContext.response.JSON(params);
     }
 
-    responseOK(value, params){
-        params.value = value.toString()
+    responseOK(value, params, asString = true){
+        params.value = asString ? value.toString() : value
         this.HttpContext.response.JSON(params)
     }
 
