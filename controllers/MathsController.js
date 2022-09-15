@@ -104,8 +104,18 @@ module.exports = class MathsController extends require('./Controller'){
     }
 
     processDivision(params){
-        if(this.validateParameters(params, ['x', 'y']))
-            this.responseOK(Number(params.x) / Number(params.y), params);
+        if(this.validateParameters(params, ['x', 'y'])){
+            if(Number(params.y) == 0)
+                if (Number(params.x) > 0)
+                    this.responseOK(Infinity, params);
+                else if (Number(params.x) < 0)
+                    this.responseOK(-Infinity, params);
+                else
+                    this.responseOK(null, params, false);
+            else
+                this.responseOK(Number(params.x) / Number(params.y), params);
+        }
+            
     }
 
     processModulo(params){
@@ -162,7 +172,7 @@ function factorial(n){
     if(n===0||n===1){
       return 1;
     }
-    return n*this.factorial(n-1);
+    return n*factorial(n-1);
 }
 
 function isPrime(value) {
