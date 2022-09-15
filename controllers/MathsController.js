@@ -111,7 +111,7 @@ module.exports = class MathsController extends require('./Controller'){
                 else if (Number(params.x) < 0)
                     this.responseOK(-Infinity, params);
                 else
-                    this.responseOK(null, params, false);
+                    this.responseOK(NaN, params);
             else
                 this.responseOK(Number(params.x) / Number(params.y), params);
         }
